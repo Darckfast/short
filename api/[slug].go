@@ -81,6 +81,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	longUrl := DownloadBlob(blob.Blobs[0].URL)
 
-	html := strings.Replace(HTML_TEMPLATE, "PLACE_URL_HERE", longUrl, 1)
-	fmt.Fprintf(w, html)
+	w.WriteHeader(301)
+	w.Header().Set("Location", longUrl)
 }

@@ -10,8 +10,6 @@ import (
 	"time"
 )
 
-const HTML_TEMPLATE = `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="5; URL='PLACE_URL_HERE'"/></head><body></body></html>`
-
 const (
 	BLOB_API_VERSION = "4"
 	DEFAULT_BASE_URL = "https://blob.vercel-storage.com"

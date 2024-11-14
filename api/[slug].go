@@ -80,5 +80,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	longUrl := DownloadBlob(blob.Blobs[0].URL)
 
 	w.WriteHeader(301)
+	w.Header().Set("Cache-Control", "604800")
 	w.Header().Set("Location", longUrl)
 }

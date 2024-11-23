@@ -4,10 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	multilogger "github.com/Darckfast/multi_logger/pkg/multi_logger"
 )
 
 const (
@@ -66,7 +69,22 @@ func DownloadBlob(fileUrl string) string {
 	return string(body)
 }
 
+var logger = slog.New(multilogger.NewHandler(os.Stdout))
+
 func Handler(w http.ResponseWriter, r *http.Request) {
+	ctx, wg := multilogger.SetupContext(&multilogger.SetupOps{
+		Request:     r,
+		ApiKey:      os.Getenv("BASELIME_API_KEY"),
+		ServiceName: os.Getenv("VERCEL_GIT_REPO_SLUG"),
+	})
+
+	defer func() {
+		wg.Wait()
+		ctx.Done()
+	}()
+
+	logger.InfoContext(ctx, "Processing request")
+
 	urlPath := strings.Split(r.URL.Path, "/")
 	blobHash := urlPath[len(urlPath)-1]
 
@@ -82,4 +100,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(301)
 	w.Header().Set("Cache-Control", "604800")
 	w.Header().Set("Location", longUrl)
+
+	logger.InfoContext(ctx, "request completed", "status", 301)
 }

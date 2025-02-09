@@ -31,7 +31,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	logger.InfoContext(ctx, "Processing request")
 
 	urlPath := strings.Split(r.URL.Path, "/")
+	subFolder := r.URL.Query().Get("f")
+
 	blobHash := urlPath[len(urlPath)-1]
+
+	if subFolder != "" {
+		blobHash = subFolder + "/" + blobHash
+	}
 
 	blob := utils.FindBlob(blobHash)
 
@@ -42,6 +48,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	longUrl := utils.DownloadBlob(blob.Blobs[0].URL)
+
+	longUrl = strings.TrimSpace(longUrl)
 
 	w.WriteHeader(301)
 	w.Header().Set("Cache-Control", "604800")

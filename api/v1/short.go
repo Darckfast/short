@@ -39,17 +39,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		blobHash = subFolder + "/" + blobHash
 	}
 
-	blob := utils.FindBlob(blobHash)
-
-	if len(blob.Blobs) == 0 {
+	longUrl, err := utils.GetKVUrl(blobHash)
+	if err != nil {
 		fmt.Fprintf(w, "<h1>no result found</h1>")
-		logger.WarnContext(ctx, "no short link found", "status", 200)
+		logger.WarnContext(ctx, "no short link found", "status", 200, "error", err.Error())
 		return
 	}
-
-	longUrl := utils.DownloadBlob(blob.Blobs[0].URL)
-
-	longUrl = strings.TrimSpace(longUrl)
 
 	w.WriteHeader(301)
 	w.Header().Set("Cache-Control", "604800")

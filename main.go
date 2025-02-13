@@ -9,6 +9,6 @@ import (
 )
 
 func main() {
-	http.HandleFunc("GET /", short.Handler)
+	http.HandleFunc("GET /{id}", short.Handler)
 	workers.Serve(nil)
 }

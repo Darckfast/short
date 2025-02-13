@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-	"strings"
 
 	"main/pkg/utils"
 
@@ -30,19 +29,17 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	logger.InfoContext(ctx, "Processing request")
 
-	urlPath := strings.Split(r.URL.Path, "/")
+	urlPath := r.PathValue("id")
 	subFolder := r.URL.Query().Get("f")
 
-	blobHash := urlPath[len(urlPath)-1]
-
 	if subFolder != "" {
-		blobHash = subFolder + "/" + blobHash
+		urlPath = subFolder + "/" + urlPath
 	}
 
-	longUrl, err := utils.GetKVUrl(blobHash)
+	longUrl, err := utils.GetKVUrl(urlPath)
 	if err != nil {
 		fmt.Fprintf(w, "<h1>no result found</h1>")
-		logger.WarnContext(ctx, "error getting KV value", "status", 200, "error", err.Error())
+		logger.ErrorContext(ctx, "error getting KV value", "status", 200, "error", err.Error())
 		return
 	}
 

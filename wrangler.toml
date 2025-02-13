@@ -10,3 +10,7 @@ command = "make build"
 
 [observability.logs]
 enabled = true
+
+[[kv_namespaces]]
+binding = "KV_SHORT_BINDING"
+id = "038eed382bde4f5e8397c80c8c800289"

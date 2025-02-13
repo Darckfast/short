@@ -5,7 +5,10 @@ import (
 )
 
 func GetKVUrl(key string) (string, error) {
-	counterKV, _ := kv.NewNamespace("short")
+	counterKV, err := kv.NewNamespace("KV_SHORT_BINDING")
+	if err != nil {
+		return "", err
+	}
 
 	return counterKV.GetString(key, nil)
 }

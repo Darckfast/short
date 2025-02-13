@@ -1,6 +1,6 @@
 .PHONY: dev
 dev:
-	npx wrangler dev
+	npx wrangler dev --show-interactive-dev-session false --live-reload
 
 .PHONY: build
 build:

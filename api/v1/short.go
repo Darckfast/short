@@ -42,13 +42,20 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	longUrl, err := utils.GetKVUrl(blobHash)
 	if err != nil {
 		fmt.Fprintf(w, "<h1>no result found</h1>")
-		logger.WarnContext(ctx, "no short link found", "status", 200, "error", err.Error())
+		logger.WarnContext(ctx, "error getting KV value", "status", 200, "error", err.Error())
+		return
+	}
+
+	if longUrl == "<null>" {
+		fmt.Fprintf(w, "<h1>no result found</h1>")
+		logger.WarnContext(ctx, "no short link found", "status", 200)
 		return
 	}
 
 	w.WriteHeader(301)
 	w.Header().Set("Cache-Control", "604800")
 	w.Header().Set("Location", longUrl)
+	w.Write([]byte{}) // wasm require empty body or it error out
 
 	logger.InfoContext(ctx, "request completed", "status", 301)
 }

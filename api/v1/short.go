@@ -49,10 +49,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(301)
 	w.Header().Set("Cache-Control", "604800")
 	w.Header().Set("Location", longUrl)
 	w.Write([]byte{}) // wasm require empty body or it error out
+	w.WriteHeader(301)
 
 	logger.InfoContext(ctx, "request completed", "status", 301)
 }

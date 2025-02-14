@@ -50,7 +50,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		ctx.Done()
 	}()
 
-	logger.InfoContext(ctx, "Processing request")
+	logger.InfoContext(ctx, "processing request")
 
 	urlPath := r.PathValue("id")
 	subFolder := r.URL.Query().Get("f")

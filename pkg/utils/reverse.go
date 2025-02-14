@@ -31,6 +31,7 @@ func DoReverseProxy(remoteUrl string, w http.ResponseWriter, r *http.Request) er
 
 	w.Header().Add("Content-Type", r.Header.Get("Content-Type"))
 	w.Header().Add("Content-Length", r.Header.Get("Content-Length"))
+	w.Header().Add("Cache-Control", r.Header.Get("Cache-Control"))
 
 	return nil
 }

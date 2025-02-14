@@ -29,11 +29,8 @@ func DoReverseProxy(remoteUrl string, w http.ResponseWriter, r *http.Request) er
 	io.Copy(w, resp.Body)
 	w.WriteHeader(resp.StatusCode)
 
-	for name, values := range r.Header {
-		for _, value := range values {
-			w.Header().Add(name, value)
-		}
-	}
+	w.Header().Add("Content-Type", r.Header.Get("Content-Type"))
+	w.Header().Add("Content-Length", r.Header.Get("Content-Length"))
 
 	return nil
 }

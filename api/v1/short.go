@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 
 	"main/pkg/utils"
 
@@ -46,6 +47,17 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if longUrl == "<null>" {
 		fmt.Fprintf(w, "<h1>no result found</h1>")
 		logger.WarnContext(ctx, "no short link found", "status", 200)
+		return
+	}
+
+	if strings.Contains(longUrl, "reverse:") {
+		err := utils.DoReverseProxy(longUrl, w, r)
+		if err != nil {
+			fmt.Fprintf(w, "<h1>no result found</h1>")
+			logger.ErrorContext(ctx, "error proxing reqeust", "status", 200, "error", err.Error())
+		}
+
+		logger.InfoContext(ctx, "request completed", "status", 200)
 		return
 	}
 

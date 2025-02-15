@@ -68,7 +68,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	if longUrl == "<null>" {
 		fmt.Fprintf(w, "<h1>no result found</h1>")
-		logger.WarnContext(ctx, "no short link found", "status", 200)
+		logger.InfoContext(ctx, "no short link found", "status", 200)
 		return
 	}
 

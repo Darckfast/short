@@ -94,7 +94,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	if doReverseProxy {
 		err := utils.DoReverseProxy(ctx, longUrl, w, r)
-		w.Header().Set("Cache-Control", cacheControl)
+		w.Header().Set("Cache-Control", "public, max-age="+cacheControl)
 
 		logger.InfoContext(ctx, "request completed", "cache", cacheControl)
 		if err != nil {
@@ -105,7 +105,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(301)
 	w.Header().Set("Location", longUrl)
-	w.Header().Set("Cache-Control", cacheControl)
+	w.Header().Set("Cache-Control", "public, max-age="+cacheControl)
 	w.Write([]byte{}) // wasm require empty body or it error out
 
 	logger.InfoContext(ctx, "request completed", "status", 301, "cache", cacheControl)

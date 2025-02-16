@@ -54,7 +54,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	urlPath := r.PathValue("id")
 	subFolder := r.URL.Query().Get("f")
-
 	if urlPath == "" {
 		urlPath = "index"
 	}
@@ -63,7 +62,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		urlPath = subFolder + "/" + urlPath
 	}
 
+	logger.InfoContext(ctx, "search short url", "url", urlPath)
 	longUrl, err := utils.GetKVUrl(urlPath)
+	longUrl = "reverse|cache=86400|https://pages.leezi.live"
 	if err != nil {
 		fmt.Fprintf(w, "<h1>no result found</h1>")
 		logger.ErrorContext(ctx, "error getting KV value", "status", 200, "error", err.Error())
@@ -76,19 +77,37 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if strings.Contains(longUrl, "reverse:") {
+	flags := strings.Split(longUrl, "|")
+
+	doReverseProxy := false
+	cacheControl := ""
+	if len(flags) > 0 {
+		for _, flag := range flags {
+			if flag == "reverse" {
+				doReverseProxy = true
+			} else if strings.Contains(flag, "cache") {
+				cacheControl = strings.Split(flag, "=")[1]
+			} else if strings.Contains(flag, "https://") {
+				longUrl = flag
+			}
+		}
+	}
+
+	if doReverseProxy {
 		err := utils.DoReverseProxy(ctx, longUrl, w, r)
+		w.Header().Set("Cache-Control", cacheControl)
+
+		logger.InfoContext(ctx, "request completed", "cache", cacheControl)
 		if err != nil {
 			fmt.Fprintf(w, "<h1>no result found</h1>")
 		}
 
 		return
 	}
-
 	w.WriteHeader(301)
-	w.Header().Set("Cache-Control", "604800")
 	w.Header().Set("Location", longUrl)
+	w.Header().Set("Cache-Control", cacheControl)
 	w.Write([]byte{}) // wasm require empty body or it error out
 
-	logger.InfoContext(ctx, "request completed", "status", 301)
+	logger.InfoContext(ctx, "request completed", "status", 301, "cache", cacheControl)
 }

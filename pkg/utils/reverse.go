@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-	"strings"
 
 	multilogger "github.com/Darckfast/multi_logger/pkg/multi_logger"
 	"github.com/syumai/workers/cloudflare/fetch"
@@ -15,15 +14,13 @@ import (
 var logger = slog.New(multilogger.NewHandler(os.Stdout))
 
 func DoReverseProxy(ctx context.Context, remoteUrl string, w http.ResponseWriter, r *http.Request) error {
-	remoteUrl = strings.Replace(remoteUrl, "reverse:", "", 1)
-
 	req, err := fetch.NewRequest(r.Context(), r.Method, remoteUrl, r.Body)
-	req.Header = r.Header.Clone()
-
 	if err != nil {
 		logger.ErrorContext(ctx, "error creating proxying request", "status", 500, "error", err.Error())
 		return err
 	}
+
+	req.Header = r.Header.Clone()
 
 	cli := fetch.NewClient()
 	resp, err := cli.Do(req, nil)
@@ -39,9 +36,8 @@ func DoReverseProxy(ctx context.Context, remoteUrl string, w http.ResponseWriter
 
 	w.Header().Add("Content-Type", r.Header.Get("Content-Type"))
 	w.Header().Add("Content-Length", r.Header.Get("Content-Length"))
-	w.Header().Add("Cache-Control", r.Header.Get("Cache-Control"))
 
-	logger.InfoContext(ctx, "reverse proxy response", "status", resp.StatusCode)
+	logger.InfoContext(ctx, "reverse proxy response", "status", resp.StatusCode, "proxy", true)
 
 	return nil
 }

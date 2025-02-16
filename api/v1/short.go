@@ -64,7 +64,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	logger.InfoContext(ctx, "search short url", "url", urlPath)
 	longUrl, err := utils.GetKVUrl(urlPath)
-	longUrl = "reverse|cache=86400|https://pages.leezi.live"
 	if err != nil {
 		fmt.Fprintf(w, "<h1>no result found</h1>")
 		logger.ErrorContext(ctx, "error getting KV value", "status", 200, "error", err.Error())

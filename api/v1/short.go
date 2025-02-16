@@ -55,6 +55,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	urlPath := r.PathValue("id")
 	subFolder := r.URL.Query().Get("f")
 
+	if urlPath == "" {
+		urlPath = "index"
+	}
+
 	if subFolder != "" {
 		urlPath = subFolder + "/" + urlPath
 	}

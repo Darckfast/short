@@ -45,28 +45,42 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		ctx.Done()
 	}()
 
-	// logger.InfoContext(ctx, "processing request")
+	logger.InfoContext(ctx, "processing request")
 
-	urlPath := r.PathValue("id")
+	urlPath := r.URL.Path
 	subFolder := r.URL.Query().Get("f")
-	if urlPath == "" {
+	if urlPath == "" || urlPath == "/" {
 		urlPath = "index"
+	}
+
+	urlPath = strings.Replace(urlPath, "/", "", 1)
+
+	if len(urlPath) > 0 && urlPath[len(urlPath)-1:] == "/" {
+		urlPath = urlPath[:len(urlPath)-1]
+	}
+
+	urlPathParts := strings.Split(urlPath, "/")
+	subPath := ""
+	if len(urlPathParts) > 1 {
+		subPath = strings.Join(urlPathParts[1:], "/")
+		urlPath = urlPathParts[0]
 	}
 
 	if subFolder != "" {
 		urlPath = subFolder + "/" + urlPath
 	}
 
+	logger.InfoContext(ctx, "search short url", "url", urlPath)
 	longUrl, err := utils.GetKVUrl(urlPath)
 	if err != nil {
 		fmt.Fprintf(w, "<h1>no result found</h1>")
-		logger.ErrorContext(ctx, "error getting KV value", "status", 200, "error", err.Error(), "url", urlPath)
+		logger.ErrorContext(ctx, "error getting KV value", "status", 200, "error", err.Error())
 		return
 	}
 
 	if longUrl == "<null>" {
 		fmt.Fprintf(w, "<h1>no result found</h1>")
-		logger.InfoContext(ctx, "no short link found", "status", 200, "url", urlPath)
+		logger.InfoContext(ctx, "no short link found", "status", 200)
 		return
 	}
 
@@ -86,13 +100,17 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if subPath != "" {
+		longUrl += "/" + subPath
+	}
+
 	if doReverseProxy {
 		err := utils.DoReverseProxy(ctx, longUrl, w, r)
 		if cacheControl != "" {
 			w.Header().Set("Cache-Control", "public, max-age="+cacheControl)
 		}
 
-		logger.InfoContext(ctx, "request completed", "cache", cacheControl, "url", urlPath)
+		logger.InfoContext(ctx, "request completed", "cache", cacheControl)
 		if err != nil {
 			fmt.Fprintf(w, "<h1>no result found</h1>")
 		}
@@ -104,5 +122,5 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "public, max-age="+cacheControl)
 	w.Write([]byte{}) // wasm require empty body or it error out
 
-	logger.InfoContext(ctx, "request completed", "status", 301, "cache", cacheControl, "url", urlPath)
+	logger.InfoContext(ctx, "request completed", "status", 301, "cache", cacheControl)
 }

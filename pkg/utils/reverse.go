@@ -14,8 +14,7 @@ import (
 var logger = slog.New(multilogger.NewHandler(os.Stdout))
 
 func DoReverseProxy(ctx context.Context, remoteUrl string, w http.ResponseWriter, r *http.Request) error {
-	req, err := http.NewRequestWithContext(r.Context(), r.Method, remoteUrl, r.Body)
-	// req, err := fetch.NewRequest(r.Context(), r.Method, remoteUrl, r.Body)
+	req, err := fetch.NewRequest(r.Context(), r.Method, remoteUrl, r.Body)
 	if err != nil {
 		logger.ErrorContext(ctx, "error creating proxying request", "status", 500, "error", err.Error())
 		return err
@@ -23,11 +22,8 @@ func DoReverseProxy(ctx context.Context, remoteUrl string, w http.ResponseWriter
 
 	req.Header = r.Header.Clone()
 
-	cli := fetch.NewClient().HTTPClient(fetch.RedirectModeFollow)
-	cli.Transport = &http.Transport{
-		DisableCompression: true,
-	}
-	resp, err := cli.Do(req)
+	cli := fetch.NewClient()
+	resp, err := cli.Do(req, nil)
 	if err != nil {
 		logger.ErrorContext(ctx, "error reversing proxying request", "status", 500, "error", err.Error())
 		return err

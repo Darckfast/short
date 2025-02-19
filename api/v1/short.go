@@ -70,12 +70,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	longUrl, err := utils.GetKVUrl(urlPath)
 	if err != nil {
+		w.Header().Add("Content-Type", "text/html")
 		fmt.Fprintf(w, "<h1>no result found</h1>")
+
 		logger.ErrorContext(ctx, "error getting KV value", "status", 200, "error", err.Error(), "url", urlPath)
 		return
 	}
 
 	if longUrl == "<null>" {
+		w.Header().Add("Content-Type", "text/html")
 		fmt.Fprintf(w, "<h1>no result found</h1>")
 		logger.InfoContext(ctx, "no short link found", "status", 200, "url", urlPath)
 		return
@@ -109,6 +112,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		logger.InfoContext(ctx, "request completed", "cache", cacheControl, "url", urlPath)
 		if err != nil {
+			w.Header().Add("Content-Type", "text/html")
 			fmt.Fprintf(w, "<h1>no result found</h1>")
 		}
 

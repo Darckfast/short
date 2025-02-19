@@ -47,10 +47,23 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	logger.InfoContext(ctx, "processing request")
 
-	urlPath := r.PathValue("id")
+	urlPath := r.URL.Path
 	subFolder := r.URL.Query().Get("f")
 	if urlPath == "" {
 		urlPath = "index"
+	}
+
+	urlPath = strings.Replace(urlPath, "/", "", 1)
+
+	if len(urlPath) > 0 && urlPath[len(urlPath)-1:] == "/" {
+		urlPath = urlPath[:len(urlPath)-1]
+	}
+
+	urlPathParts := strings.Split(urlPath, "/")
+	subPath := ""
+	if len(urlPathParts) > 1 {
+		subPath = strings.Join(urlPathParts[1:], "/")
+		urlPath = urlPathParts[0]
 	}
 
 	if subFolder != "" {
@@ -87,9 +100,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if subPath != "" {
+		longUrl += "/" + subPath
+	}
+
 	if doReverseProxy {
 		err := utils.DoReverseProxy(ctx, longUrl, w, r)
-		w.Header().Set("Cache-Control", "public, max-age="+cacheControl)
+		if cacheControl != "" {
+			w.Header().Set("Cache-Control", "public, max-age="+cacheControl)
+		}
 
 		logger.InfoContext(ctx, "request completed", "cache", cacheControl)
 		if err != nil {

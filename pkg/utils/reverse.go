@@ -30,16 +30,21 @@ func DoReverseProxy(ctx context.Context, remoteUrl string, w http.ResponseWriter
 	}
 
 	defer resp.Body.Close()
-	io.Copy(w, resp.Body)
-
-	w.WriteHeader(resp.StatusCode)
 	w.Header().Add("Content-Type", resp.Header.Get("Content-Type"))
 	w.Header().Add("Content-Length", resp.Header.Get("Content-Length"))
 	w.Header().Add("Cache-Control", resp.Header.Get("Cache-Control"))
 	w.Header().Add("Content-Encoding", resp.Header.Get("Content-Encoding"))
 	w.Header().Add("Content-Security-Policy", resp.Header.Get("Content-Security-Policy"))
 	w.Header().Add("Reporting-Endpoints", resp.Header.Get("Reporting-Endpoints"))
+	w.Header().Add("Link", resp.Header.Get("Link"))
+	w.Header().Add("cf-cache-status", resp.Header.Get("cf-cache-status"))
+	w.Header().Add("x-content-type-options", resp.Header.Get("x-content-type-options"))
+	w.Header().Add("referrer-policy", resp.Header.Get("referrer-policy"))
+	w.Header().Add("Access-Control-Allow-Origin", resp.Header.Get("Access-Control-Allow-Origin"))
 	w.Header().Add("Content-Security-Policy-Report-Only", resp.Header.Get("Content-Security-Policy-Report-Only"))
+
+	io.Copy(w, resp.Body)
+	w.WriteHeader(resp.StatusCode)
 
 	return nil
 }

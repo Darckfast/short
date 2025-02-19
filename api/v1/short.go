@@ -45,8 +45,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		ctx.Done()
 	}()
 
-	logger.InfoContext(ctx, "processing request")
-
 	urlPath := r.URL.Path
 	subFolder := r.URL.Query().Get("f")
 	if urlPath == "" || urlPath == "/" {
@@ -70,17 +68,16 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		urlPath = subFolder + "/" + urlPath
 	}
 
-	logger.InfoContext(ctx, "search short url", "url", urlPath)
 	longUrl, err := utils.GetKVUrl(urlPath)
 	if err != nil {
 		fmt.Fprintf(w, "<h1>no result found</h1>")
-		logger.ErrorContext(ctx, "error getting KV value", "status", 200, "error", err.Error())
+		logger.ErrorContext(ctx, "error getting KV value", "status", 200, "error", err.Error(), "url", urlPath)
 		return
 	}
 
 	if longUrl == "<null>" {
 		fmt.Fprintf(w, "<h1>no result found</h1>")
-		logger.InfoContext(ctx, "no short link found", "status", 200)
+		logger.InfoContext(ctx, "no short link found", "status", 200, "url", urlPath)
 		return
 	}
 
@@ -110,7 +107,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Cache-Control", "public, max-age="+cacheControl)
 		}
 
-		logger.InfoContext(ctx, "request completed", "cache", cacheControl)
+		logger.InfoContext(ctx, "request completed", "cache", cacheControl, "url", urlPath)
 		if err != nil {
 			fmt.Fprintf(w, "<h1>no result found</h1>")
 		}
@@ -122,5 +119,5 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "public, max-age="+cacheControl)
 	w.Write([]byte{}) // wasm require empty body or it error out
 
-	logger.InfoContext(ctx, "request completed", "status", 301, "cache", cacheControl)
+	logger.InfoContext(ctx, "request completed", "status", 301, "cache", cacheControl, "url", urlPath)
 }

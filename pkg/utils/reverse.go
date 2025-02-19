@@ -39,7 +39,5 @@ func DoReverseProxy(ctx context.Context, remoteUrl string, w http.ResponseWriter
 	w.Header().Add("Cache-Control", r.Header.Get("Cache-Control"))
 	w.Header().Add("Content-Encoding", r.Header.Get("Content-Encoding"))
 
-	logger.InfoContext(ctx, "reverse proxy response", "status", resp.StatusCode, "proxy", true)
-
 	return nil
 }

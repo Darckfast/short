@@ -94,7 +94,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			if flag == "reverse" {
 				doReverseProxy = true
 			} else if strings.Contains(flag, "cache") {
-				cacheControl = strings.Split(flag, "=")[1]
+				cacheControl = strings.Join(strings.Split(flag, "=")[1:], "=")
 			} else if strings.Contains(flag, "https://") {
 				longUrl = flag
 			}

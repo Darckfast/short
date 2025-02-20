@@ -20,7 +20,12 @@ func DoReverseProxy(ctx context.Context, remoteUrl string, w http.ResponseWriter
 		return err
 	}
 
-	req.Header = r.Header.Clone()
+	req.Header.Add("Accept", r.Header.Get("Accept"))
+	req.Header.Add("Accept-Encoding", r.Header.Get("Accept-Encoding"))
+	req.Header.Add("Accept-Language", r.Header.Get("Accept-Language"))
+	req.Header.Add("User-Agent", r.UserAgent())
+	req.Header.Add("Referer", r.Referer())
+	req.Header.Add("If-None-Match", r.Header.Get("If-None-Match"))
 
 	cli := fetch.NewClient()
 	resp, err := cli.Do(req, nil)

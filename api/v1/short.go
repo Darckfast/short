@@ -45,6 +45,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		ctx.Done()
 	}()
 
+	referrer := r.Referer()
 	urlPath := r.URL.Path
 	subFolder := r.URL.Query().Get("f")
 	if urlPath == "" || urlPath == "/" {
@@ -73,14 +74,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "text/html")
 		fmt.Fprintf(w, "<h1>no result found</h1>")
 
-		logger.ErrorContext(ctx, "error getting KV value", "status", 200, "error", err.Error(), "url", urlPath)
+		logger.ErrorContext(ctx, "error getting KV value", "status", 200, "error", err.Error(), "url", urlPath, "referer", referrer)
 		return
 	}
 
 	if longUrl == "<null>" {
 		w.Header().Add("Content-Type", "text/html")
 		fmt.Fprintf(w, "<h1>no result found</h1>")
-		logger.InfoContext(ctx, "no short link found", "status", 200, "url", urlPath)
+		logger.InfoContext(ctx, "no short link found", "status", 200, "url", urlPath, "referer", referrer)
 		return
 	}
 
@@ -110,7 +111,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Cache-Control", "public, max-age="+cacheControl)
 		}
 
-		logger.InfoContext(ctx, "request completed", "cache", cacheControl, "url", urlPath)
+		logger.InfoContext(ctx, "request completed", "cache", cacheControl, "url", urlPath, "referer", referrer)
 		if err != nil {
 			w.Header().Add("Content-Type", "text/html")
 			fmt.Fprintf(w, "<h1>no result found</h1>")
@@ -118,10 +119,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
 	w.WriteHeader(301)
 	w.Header().Set("Location", longUrl)
 	w.Header().Set("Cache-Control", "public, max-age="+cacheControl)
 	w.Write([]byte{}) // wasm require empty body or it error out
 
-	logger.InfoContext(ctx, "request completed", "status", 301, "cache", cacheControl, "url", urlPath)
+	logger.InfoContext(ctx, "request completed", "status", 301, "cache", cacheControl, "url", urlPath, "referer", referrer)
 }

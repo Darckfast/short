@@ -1,0 +1,17 @@
+name = "short"
+main = "./build/worker.mjs"
+compatibility_date = "2024-04-15"
+workers_dev = false
+
+[vars]
+VERCEL_GIT_REPO_SLUG = "short"
+
+[build]
+command = "make build"
+
+[observability.logs]
+enabled = true
+
+[[kv_namespaces]]
+binding = "KV_SHORT_BINDING"
+id = "038eed382bde4f5e8397c80c8c800289"

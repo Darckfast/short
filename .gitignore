@@ -7,6 +7,11 @@
 *.dll
 *.so
 *.dylib
+.vercel
+.env
+build
+node_modules
+.wrangler
 
 # Test binary, built with `go test -c`
 *.test
@@ -24,3 +29,4 @@ go.work.sum
 # env file
 .env
 .vercel
+.dev*
